@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tidsmaskinen - SO Escape Room</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Spectral:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Spectral', serif;
+            background: linear-gradient(135deg, #1a1410 0%, #2d1810 25%, #3e2415 50%, #2d1810 75%, #1a1410 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #d4c5b9;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 40%, rgba(205, 164, 94, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 60%, rgba(139, 69, 19, 0.08) 0%, transparent 50%),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.15) 2px, rgba(0, 0, 0, 0.15) 4px);
+            pointer-events: none;
+            animation: shimmer 30s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.6; }
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: 
+                linear-gradient(135deg, rgba(58, 44, 30, 0.96) 0%, rgba(44, 33, 22, 0.96) 100%);
+            border-radius: 0;
+            box-shadow: 
+                0 40px 100px rgba(0, 0, 0, 0.8),
+                inset 0 0 80px rgba(0, 0, 0, 0.6),
+                0 0 0 2px rgba(205, 164, 94, 0.2);
+            overflow: hidden;
+            border: 4px double rgba(139, 69, 19, 0.4);
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.03"><text x="10" y="50" font-size="40" fill="%23cda45e">⏳</text></svg>') repeat,
+                repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(205, 164, 94, 0.02) 50px, rgba(205, 164, 94, 0.02) 100px);
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .gears {
+            position: absolute;
+            font-size: 4em;
+            opacity: 0.08;
+            animation: rotate 25s linear infinite;
+        }
+
+        .gear1 { top: 8%; right: 10%; animation-duration: 20s; }
+        .gear2 { bottom: 15%; left: 8%; animation-duration: 30s; animation-direction: reverse; }
+        .gear3 { top: 45%; right: 5%; animation-duration: 35s; }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, rgba(58, 44, 30, 0.9) 0%, rgba(44, 33, 22, 0.9) 100%);
+            color: #d4c5b9;
+            padding: 50px 40px;
+            text-align: center;
+            border-bottom: 5px solid rgba(139, 69, 19, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            position: relative;
+            border-bottom-style: double;
+        }
+
+        .header::after {
+            content: '⏰';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2em;
+            opacity: 0.2;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.2; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.4; transform: translateX(-50%) scale(1.1); }
+        }
+
+        .header h1 {
+            font-family: 'IM Fell English', serif;
+            font-size: 4em;
+            margin-bottom: 15px;
+            text-shadow: 
+                3px 3px 8px rgba(0, 0, 0, 0.8),
+                0 0 40px rgba(205, 164, 94, 0.4);
+            letter-spacing: 4px;
+            color: #cda45e;
+        }
+
+        .subtitle {
+            font-style: italic;
+            font-size: 1.5em;
+            opacity: 0.9;
+            margin-top: 15px;
+            letter-spacing: 2px;
+            color: #b8996e;
+        }
+
+        .timer {
+            font-size: 1.9em;
+            font-weight: bold;
+            color: #cda45e;
+            margin-top: 25px;
+            font-family: 'IM Fell English', serif;
+            text-shadow: 0 0 20px rgba(205, 164, 94, 0.5);
+        }
+
+        .content {
+            padding: 60px 50px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .start-screen, .room {
+            display: none;
+        }
+
+        .start-screen.active, .room.active {
+            display: block;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-screen h2 {
+            font-family: 'IM Fell English', serif;
+            color: #cda45e;
+            margin-bottom: 40px;
+            font-size: 3.2em;
+            text-shadow: 0 0 30px rgba(205, 164, 94, 0.3);
+            letter-spacing: 3px;
+        }
+
+        .start-screen p {
+            font-size: 1.4em;
+            line-height: 2;
+            margin-bottom: 30px;
+            color: #d4c5b9;
+            text-align: left;
+            padding: 0 30px;
+        }
+
+        .story-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 45px;
+            border-radius: 5px;
+            border: 3px double rgba(139, 69, 19, 0.4);
+            margin: 40px 0;
+            border-left: 8px solid #8b4513;
+            box-shadow: 
+                inset 0 0 40px rgba(0, 0, 0, 0.6),
+                0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #6d4c2a 0%, #8b6239 100%);
+            color: #f5e6d3;
+            border: 3px solid #8b4513;
+            padding: 24px 65px;
+            font-size: 1.6em;
+            font-family: 'IM Fell English', serif;
+            cursor: pointer;
+            transition: all 0.4s;
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.5),
+                inset 0 0 30px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(205, 164, 94, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 35px;
+            border-radius: 0;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #8b6239 0%, #a67c52 100%);
+            box-shadow: 
+                0 12px 35px rgba(139, 69, 19, 0.6),
+                inset 0 0 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(-4px);
+            border-color: #cda45e;
+        }
+
+        .btn:active {
+            transform: translateY(-2px);
+        }
+
+        .room h2 {
+            font-family: 'IM Fell English', serif;
+            color: #cda45e;
+            margin-bottom: 40px;
+            font-size: 2.8em;
+            text-shadow: 0 0 25px rgba(205, 164, 94, 0.3);
+            letter-spacing: 3px;
+            border-bottom: 4px double rgba(139, 69, 19, 0.4);
+            padding-bottom: 25px;
+        }
+
+        .puzzle {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 40px;
+            border-radius: 5px;
+            margin-bottom: 40px;
+            border: 2px solid rgba(139, 69, 19, 0.3);
+            border-left: 8px solid #8b4513;
+            box-shadow: 
+                inset 0 0 40px rgba(0, 0, 0, 0.5),
+                0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .puzzle h3 {
+            font-family: 'IM Fell English', serif;
+            color: #b8996e;
+            margin-bottom: 28px;
+            font-size: 2em;
+            letter-spacing: 2px;
+        }
+
+        .puzzle p {
+            line-height: 2;
+            margin-bottom: 25px;
+            color: #d4c5b9;
+            font-size: 1.25em;
+        }
+
+        .historical-box {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            border-radius: 5px;
+            margin: 28px 0;
+            border-left: 5px solid #cda45e;
+            color: #e5ddd0;
+            font-size: 1.2em;
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.7);
+            line-height: 2;
+            font-style: italic;
+        }
+
+        .timeline {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 25px;
+            border-radius: 5px;
+            margin: 25px 0;
+            border: 2px solid rgba(139, 69, 19, 0.4);
+        }
+
+        .timeline-item {
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #8b4513;
+            padding-left: 20px;
+            color: #d4c5b9;
+        }
+
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.4em;
+            background: rgba(0, 0, 0, 0.6);
+            border: 3px solid rgba(139, 69, 19, 0.4);
+            border-radius: 0;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            color: #d4c5b9;
+            font-family: 'Spectral', serif;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select option {
+            background: #2d1810;
+            color: #d4c5b9;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #8b4513;
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 25px rgba(139, 69, 19, 0.4);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(212, 197, 185, 0.5);
+        }
+
+        .feedback {
+            padding: 25px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-weight: bold;
+            display: none;
+            font-family: 'IM Fell English', serif;
+            letter-spacing: 2px;
+            font-size: 1.2em;
+        }
+
+        .feedback.success {
+            background: rgba(76, 175, 80, 0.25);
+            color: #c5e1a5;
+            border: 3px solid #8bc34a;
+            display: block;
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.4);
+        }
+
+        .feedback.error {
+            background: rgba(211, 47, 47, 0.25);
+            color: #ffcdd2;
+            border: 3px solid #e57373;
+            display: block;
+            box-shadow: 0 0 30px rgba(211, 47, 47, 0.4);
+        }
+
+        .progress {
+            background: rgba(0, 0, 0, 0.7);
+            height: 45px;
+            border-radius: 0;
+            overflow: hidden;
+            margin-bottom: 40px;
+            border: 3px double rgba(139, 69, 19, 0.4);
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #6d4c2a 0%, #8b6239 50%, #cda45e 100%);
+            height: 100%;
+            transition: width 0.7s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f5e6d3;
+            font-weight: bold;
+            font-family: 'IM Fell English', serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 30px rgba(205, 164, 94, 0.5);
+            font-size: 1.2em;
+        }
+
+        .hint-btn {
+            background: rgba(255, 193, 7, 0.25);
+            color: #fff9c4;
+            border: 3px solid #ffd54f;
+            padding: 14px 35px;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin-top: 20px;
+            transition: all 0.3s;
+            font-family: 'IM Fell English', serif;
+            letter-spacing: 2px;
+        }
+
+        .hint-btn:hover {
+            background: rgba(255, 193, 7, 0.4);
+            box-shadow: 0 0 25px rgba(255, 193, 7, 0.5);
+            transform: scale(1.05);
+        }
+
+        .hint {
+            background: rgba(255, 193, 7, 0.15);
+            padding: 28px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 6px solid #ffd54f;
+            display: none;
+            color: #fff9c4;
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.5);
+            line-height: 2;
+        }
+
+        .victory {
+            text-align: center;
+            padding: 70px 35px;
+        }
+
+        .victory h2 {
+            color: #cda45e;
+            font-size: 4.5em;
+            margin-bottom: 40px;
+            font-family: 'IM Fell English', serif;
+            text-shadow: 0 0 50px rgba(205, 164, 94, 0.6);
+            letter-spacing: 5px;
+        }
+
+        .victory p {
+            font-size: 1.7em;
+            color: #d4c5b9;
+            margin: 28px 0;
+            line-height: 2.2;
+        }
+
+        .emoji {
+            font-size: 7em;
+            margin: 40px 0;
+            filter: drop-shadow(0 0 30px rgba(205, 164, 94, 0.5));
+            animation: swing 3s ease-in-out infinite;
+        }
+
+        @keyframes swing {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .map-box {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 25px;
+            border: 3px double rgba(139, 69, 19, 0.4);
+            margin: 25px 0;
+            text-align: center;
+        }
+
+        .year-box {
+            display: inline-block;
+            background: rgba(139, 69, 19, 0.3);
+            padding: 15px 30px;
+            margin: 10px;
+            border: 2px solid #8b4513;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #cda45e;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2.8em; }
+            .content { padding: 40px 30px; }
+            .year-box { display: block; margin: 10px 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="gears gear1">⚙️</div>
+    <div class="gears gear2">⚙️</div>
+    <div class="gears gear3">⚙️</div>
+
+    <div class="container">
+        <div class="header">
+            <h1>⏰ TIDSMASKINEN ⏰</h1>
+            <div class="subtitle">En Resa Genom Historien</div>
+            <div class="timer" id="timer">Tid: 00:00</div>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar" style="width: 0%">Tidsepok 0/10</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Start Screen -->
+            <div class="start-screen active" id="startScreen">
+                <h2>Välkommen, Tidsresenär!</h2>
+                
+                <div class="story-box">
+                    <p>Du har upptäckt professor Chronos' försvunna tidsmaskin, gömd i källaren till det gamla museet. Maskinen surrar av kraft, men dess kontrollpanel är låst med tio historiska gåtor.</p>
+                    
+                    <p>För att aktivera tidsmaskinen och återvända till nutiden måste du bevisa din kunskap om mänsklighetens historia, från antikens civilisationer till moderna samhällen. Varje rätt svar vrider fram ett kugghjul i maskinens komplexa mekanism.</p>
+                    
+                    <p>Genom historia, geografi, samhällskunskap och källkritik måste du navigera för att låsa upp tidslinjens hemligheter. Tiden tickar och historien väntar...</p>
+                    
+                    <p style="text-align: center; font-style: italic; margin-top: 40px; font-size: 1.3em;">Klarar du att resa genom tiden?</p>
+                </div>
+                
+                <button class="btn" onclick="startGame()">Aktivera Tidsmaskinen</button>
+            </div>
+
+            <!-- Rum 1: Antikens Egypten -->
+            <div class="room" id="room1">
+                <h2>🏛️ Epok 1: Det Antika Egypten</h2>
+                <div class="puzzle">
+                    <h3>Faraonernas Land</h3>
+                    <p>Tidsmaskinen har landat vid pyramiderna. En inskription frågar:</p>
+                    
+                    <div class="historical-box">
+                        "Vid vilken flod byggde det antika Egypten sin civilisation?"
+                    </div>
+                    
+                    <input type="text" id="answer1" placeholder="Skriv flodens namn..." style="text-transform: lowercase;">
+                    <button class="btn" onclick="checkAnswer(1)">Bekräfta epoken</button>
+                    <button class="hint-btn" onclick="toggleHint(1)">⏳ Historisk ledtråd</button>
+                    <div class="hint" id="hint1">
+                        <strong>Från arkiven:</strong> Denna flod rinner genom nordöstra Afrika och var livsnerven för den egyptiska civilisationen. Den översvämmar årligen och gödslar jorden.
+                    </div>
+                    <div class="feedback" id="feedback1"></div>
+                </div>
+            </div>
+
+            <!-- Rum 2: Romarriket -->
+            <div class="room" id="room2">
+                <h2>🏺 Epok 2: Romarriket</h2>
+                <div class="puzzle">
+                    <h3>Det Eviga Riket</h3>
+                    <p>År 476 e.Kr. inträffade en avgörande händelse:</p>
+                    
+                    <div class="historical-box">
+                        "Vad hände med Västromerska riket år 476?"
+                    </div>
+                    
+                    <select id="answer2">
+                        <option value="">Välj händelse...</option>
+                        <option value="grundades">Det grundades</option>
+                        <option value="föll">Det föll/kollapsade</option>
+                        <option value="expanderade">Det expanderade mest</option>
+                        <option value="splittrades">Det delades i två</option>
+                    </select>
+                    
+                    <button class="btn" onclick="checkAnswer(2)">Fortsätt resan</button>
+                    <button class="hint-btn" onclick="toggleHint(2)">⏳ Historisk ledtråd</button>
+                    <div class="hint" id="hint2">
+                        <strong>Från arkiven:</strong> Året 476 markerar ofta slutet på antiken och början på medeltiden. Den siste romerske kejsaren avsattes.
+                    </div>
+                    <div class="feedback" id="feedback2"></div>
+                </div>
+            </div>
+
+            <!-- Rum 3: Vikingatiden -->
+            <div class="room" id="room3">
+                <h2>⚔️ Epok 3: Vikingatiden</h2>
+                <div class="puzzle">
+                    <h3>Nordens Krigare</h3>
+                    <p>Tidsmaskinen visar vikingaskepp på öppet hav. En fråga ekar:</p>
+                    
+                    <div class="historical-box">
+                        "Ungefär vilka år räknas vikingatiden? (t.ex. 800-1050)"
+                    </div>
+                    
+                    <input type="text" id="answer3" placeholder="Skriv tidsperiod..." style="text-transform: lowercase;">
+                    <button class="btn" onclick="checkAnswer(3)">Segla vidare</button>
+                    <button class="hint-btn" onclick="toggleHint(3)">⏳ Historisk ledtråd</button>
+                    <div class="hint" id="hint3">
+                        <strong>Från arkiven:</strong> Vikingatiden brukar sägas börja runt år 800 (Lindisfarnes plundring) och sluta runt 1050. Den varade i cirka 250-300 år.
+                    </div>
+                    <div class="feedback" id="feedback3"></div>
+                </div>
+            </div>
+
+            <!-- Rum 4: Medeltidens Europa -->
+            <div class="room" id="room4">
+                <h2>🏰 Epok 4: Medeltiden</h2>
+                <div class="puzzle">
+                    <h3>Feodalsamhället</h3>
+                    <p>Ett medeltida samhälle visar sin struktur:</p>
+                    
+                    <div class="timeline">
+                        <div class="timeline-item">Kung - Härskare</div>
+                        <div class="timeline-item">Adel - Jordägare</div>
+                        <div class="timeline-item">? - Bönderna</div>
+                    </div>
+                    
+                    <p>Vad kallades de bönder som var bundna till jorden och ägdes av adeln?</p>
+                    
+                    <input type="text" id="answer4" placeholder="Ditt svar..." style="text-transform: lowercase;">
+                    <button class="btn" onclick="checkAnswer(4)">Bryt kedjorna</button>
+                    <button class="hint-btn" onclick="toggleHint(4)">⏳ Historisk ledtråd</button>
+                    <div class="hint" id="hint4">
+                        <strong>Från arkiven:</strong> Dessa bönder var inte fria. De började på "l" och var bundna till jorden som de brukade. Det liknar ordet "leva".
+                    </div>
+                    <div class="feedback" id="feedback4"></div>
+                </div>
+            </div>
+
+            <!-- Rum 5: Renässansen -->
+            <div class="room" id="room5">
+                <h2>🎨 Epok 5: Renässansen</h2>
+                <div class="puzzle">
+                    <h3>Kulturens Återfödelse</h3>
+                    <p>En lysande epok av konst och vetenskap öppnar sig:</p>
+                    
+                    <div class="historical-box">
+                        "I vilket land började renässansen på 1300-talet?"
+                    </div>
+                    
+                    <select id="answer5">
+                        <option value="">Välj land...</option>
+                        <option value="frankrike">Frankrike</option>
+                        <option value="italien">Italien</option>
+                        <option value="england">England</option>
+                        <option value="spanien">Spanien</option>
+                    </select>
+                    
+                    <button class="btn" onclick="checkAnswer(5)">Upplys epoken</button>
+                    <button class="hint-btn" onclick="toggleHint(5)">⏳ Historisk ledtråd</button>
+                    <div class="hint" id="hint5">
+                        <strong>Från arkiven:</strong> Städer som Florens, Venedig och Rom var centrum för denna kulturella blomstring. Tänk på Leonardo da Vinci och Michelangelo.
+                    </div>
+                    <div class="feedback" id="feedback5"></div>
+                </div>
+            </div>
+
+            <!-- Rum 6: Franska Revolutionen -->
+            <div class="room" id="room6">
+                <h2>🗽 Epok 6: Franska Revolutionen</h2>
+                <div class="puzzle">
+                    <h3>Frihetens År</h3>
+                    <p>Folket ropar "Liberté, Égalité, Fraternité!"</p>
+                    
+                    <div class="map-box">
+                        <div class="year-box">1776</div>
+                        <div class="year-box">1789</div>
+                        <div class="year-box">1799</div>
+                        <div class="year-box">1815</div>
+                    </div>
+                    
+                    <p>Vilket år började Franska revolutionen?</p>
+                    
+                    <input type="number" id="answer6" placeholder="Årtalet...">
+                    <button class="btn" onclick="checkAnswer(6)">Störta monarkin</button>
+                    <button class="hint-btn" onclick="toggleHint(6)">⏳ Historisk ledtråd</button>
+                    <div class="hint" id="hint6">
+                        <strong>Från arkiven:</strong> Revolutionen startade med stormningen av Bastiljen. Det var några år efter den amerikanska revolutionen, men före Napoleon.
+                    </div>
+                    <div class="feedback" id="feedback6"></div>
+                </div>
+            </div>
+
+            <!-- Rum 7: Industriella Revolutionen -->
+            <div class="room" id="room7">
+                <h2>⚙️ Epok 7: Industriella Revolutionen</h2>
+                <div class="puzzle">
+                    <h3>Maskinernas Tidsålder</h3>
+                    <p>Fabrikernas rök fyller himlen. En avgörande uppfinning förändrade allt:</p>
+                    
+                    <div class="historical-box">
+                        "Vilken energikälla drev de första fabrikerna och ångmaskinerna?"
+                    </div>
+                    
+                    <select id="answer7">
+                        <option value="">Välj energikälla...</option>
+                        <option value="olja">Olja</option>
+                        <option value="kol">Kol</option>
+                        <option value="elektricitet">Elektricitet</option>
+                        <option value="vatten">Vattenkraft</option>
+                    </select>
+                    
+                    <button class="btn" onclick="checkAnswer(7)">Elda maskinen</button>
+                    <button class="hint-btn" onclick="toggleHint(7)">⏳ Historisk ledtråd</button>
+                    <div class="hint" id="hint7">
+                        <strong>Från arkiven:</strong> Detta brännbara berg material grävdes upp från gruvor och användes för att värma vatten till ånga. Svart guldlikt mineral.
+                    </div>
+                    <div class="feedback" id="feedback7"></div>
+                </div>
+            </div>
+
+            <!-- Rum 8: Första Världskriget -->
+            <div class="room" id="room8">
+                <h2>💣 Epok 8: Det Stora Kriget</h2>
+                <div class="puzzle">
+                    <h3>Kriget Som Skulle Avsluta Alla Krig</h3>
+                    <p>Skyttegravarna sträcker sig över Europa:</p>
+                    
+                    <div class="historical-box">
+                        "Vilka år pågick första världskriget? (Skriv som: 1914-1918)"
+                    </div>
+                    
+                    <input type="text" id="answer8" placeholder="t.ex. 1914-1918">
+                    <button class="btn" onclick="checkAnswer(8)">Avsluta kriget</button>
+                    <button class="hint-btn" onclick="toggleHint(8)">⏳ Historisk ledtråd</button>
+                    <div class="hint" id="hint8">
+                        <strong>Från arkiven:</strong> Kriget började 1914 med mordet i Sarajevo och slutade 1918 med vapenvila. Det varade i fyra år.
+                    </div>
+                    <div class="feedback" id="feedback8"></div>
+                </div>
+            </div>
+
+            <!-- Rum 9: Kalla Kriget -->
+            <div class="room" id="room9">
+                <h2>🧊 Epok 9: Kalla Kriget</h2>
+                <div class="puzzle">
+                    <h3>Två Supermakter</h3>
+                    <p>Järnridån delar Europa. Två stormakter står mot varandra:</p>
+                    
+                    <div class="historical-box">
+                        "Vilka två supermakter stod mot varandra under kalla kriget?"
+                    </div>
+                    
+                    <select id="answer9">
+                        <option value="">Välj alternativ...</option>
+                        <option value="usa-sovjet">USA och Sovjetunionen</option>
+                        <option value="usa-kina">USA och Kina</option>
+                        <option value="england-tyskland">England och Tyskland</option>
+                        <option value="frankrike-ryssland">Frankrike och Ryssland</option>
+                    </select>
+                    
+                    <button class="btn" onclick="checkAnswer(9)">Överskrid gränsen</button>
+                    <button class="hint-btn" onclick="toggleHint(9)">⏳ Historisk ledtråd</button>
+                    <div class="hint" id="hint9">
+                        <strong>Från arkiven:</strong> Det ena landet var kapitalistiskt och demokratiskt, det andra kommunistiskt. De tävlade om världsinflytande 1945-1991.
+                    </div>
+                    <div class="feedback" id="feedback9"></div>
+                </div>
+            </div>
+
+            <!-- Rum 10: FN och Demokrati -->
+            <div class="room" id="room10">
+                <h2>🌍 Epok 10: Modern Tid - Globalt Samarbete</h2>
+                <div class="puzzle">
+                    <h3>Förenta Nationerna</h3>
+                    <p>Tidsmaskinen når nutiden. En sista fråga om dagens värld:</p>
+                    
+                    <div class="historical-box">
+                        "Vilket år grundades Förenta Nationerna (FN)?"
+                    </div>
+                    
+                    <select id="answer10">
+                        <option value="">Välj år...</option>
+                        <option value="1918">1918</option>
+                        <option value="1939">1939</option>
+                        <option value="1945">1945</option>
+                        <option value="1989">1989</option>
+                    </select>
+                    
+                    <button class="btn" onclick="checkAnswer(10)">Återvänd till nutiden!</button>
+                    <button class="hint-btn" onclick="toggleHint(10)">⏳ Historisk ledtråd</button>
+                    <div class="hint" id="hint10">
+                        <strong>Från arkiven:</strong> FN grundades direkt efter andra världskrigets slut, samma år som kriget slutade. Det skulle förhindra framtida världskrig.
+                    </div>
+                    <div class="feedback" id="feedback10"></div>
+                </div>
+            </div>
+
+            <!-- Victory Screen -->
+            <div class="room" id="victory">
+                <div class="victory">
+                    <div class="emoji">⏰🎉</div>
+                    <h2>VÄLKOMMEN TILLBAKA!</h2>
+                    <p>Tidsmaskinen lyser upp och kugghjulen stannar. Du har rest genom mänsklighetens historia och bevisat din kunskap om civilisationer, krig, revolutioner och samhällen.</p>
+                    
+                    <div class="historical-box" style="margin: 45px 0;">
+                        "De som inte kan minnas det förflutna är dömda att upprepa det."
+                        <div style="text-align: right; margin-top: 18px; font-style: normal; color: #cda45e;">— George Santayana</div>
+                    </div>
+                    
+                    <p><strong>Din tidsresa tog:</strong> <span id="finalTime"></span></p>
+                    
+                    <p style="font-style: italic; margin-top: 40px; font-size: 1.5em;">Historien är vår lärare. Kunskap är din kompass.</p>
+                    
+                    <button class="btn" onclick="location.reload()">Res Igen Genom Tiden</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const answers = {
+            1: 'nilen',
+            2: 'föll',
+            3: '800-1050',          // acceptera varianter
+            4: 'livegna',
+            5: 'italien',
+            6: 1789,
+            7: 'kol',
+            8: '1914-1918',
+            9: 'usa-sovjet',
+            10: '1945'
+        };
+
+        let currentRoom = 0;
+        let solvedRooms = 0;
+        let startTime;
+        let timerInterval;
+
+        function startGame() {
+            document.getElementById('startScreen').classList.remove('active');
+            currentRoom = 1;
+            showRoom(1);
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function showRoom(roomNumber) {
+            document.getElementById('room' + roomNumber).classList.add('active');
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('timer').textContent = `Tid: ${minutes}:${seconds}`;
+        }
+
+        function updateProgress() {
+            const percentage = (solvedRooms / 10) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressBar').textContent = `Tidsepok ${solvedRooms}/10`;
+        }
+
+        function checkAnswer(roomNumber) {
+            let userAnswer;
+            const element = document.getElementById('answer' + roomNumber);
+            
+            if (element.tagName === 'SELECT') {
+                userAnswer = element.value.toLowerCase().trim();
+            } else if (element.type === 'number') {
+                userAnswer = parseInt(element.value);
+            } else {
+                userAnswer = element.value.toLowerCase().trim();
+            }
+            
+            let correctAnswer = answers[roomNumber];
+            if (typeof correctAnswer === 'string') {
+                correctAnswer = correctAnswer.toLowerCase().trim();
+            }
+            
+            const feedback = document.getElementById('feedback' + roomNumber);
+
+            // Special handling for room 3 (vikingatiden)
+            if (roomNumber === 3) {
+                const acceptable = ['800-1050', '793-1066', '800-1066'];
+                if (acceptable.some(ans => userAnswer.includes(ans.split('-')[0]))) {
+                    userAnswer = correctAnswer;
+                }
+            }
+
+            if (userAnswer == correctAnswer) {
+                feedback.className = 'feedback success';
+                const messages = [
+                    '✓ Korrekt! Nilen var civilisationens livsnerv...',
+                    '✓ Rätt! Riket föll och medeltiden började...',
+                    '✓ Exakt! Vikingarna härjade i denna tid...',
+                    '✓ Rätt! Livegna var bundna till jorden...',
+                    '✓ Perfekt! Italien födde renässansen...',
+                    '✓ Korrekt! 1789 började revolutionen...',
+                    '✓ Rätt! Kol drev den industriella revolutionen...',
+                    '✓ Exakt! Det stora kriget 1914-1918...',
+                    '✓ Korrekt! USA och Sovjetunionen dominerade...',
+                    '✓ Perfekt! FN grundades 1945 för fred...'
+                ];
+                feedback.textContent = messages[roomNumber - 1];
+                solvedRooms++;
+                updateProgress();
+
+                setTimeout(() => {
+                    document.getElementById('room' + roomNumber).classList.remove('active');
+                    if (roomNumber < 10) {
+                        currentRoom = roomNumber + 1;
+                        showRoom(currentRoom);
+                    } else {
+                        showVictory();
+                    }
+                }, 2500);
+            } else {
+                feedback.className = 'feedback error';
+                const errorMessages = [
+                    '✗ Fel flod. Tänk på Egyptens geografi...',
+                    '✗ Inte rätt. Vad hände med riket?',
+                    '✗ Fel period. Titta på ledtråden...',
+                    '✗ Fel ord. De var inte fria...',
+                    '✗ Fel land. Var bodde da Vinci?',
+                    '✗ Fel år. Efter amerikanska revolutionen...',
+                    '✗ Fel energikälla. Tänk ångmaskiner...',
+                    '✗ Fel år. Kriget började 1914...',
+                    '✗ Fel par. USA mot...?',
+                    '✗ Fel år. Efter andra världskriget...'
+                ];
+                feedback.textContent = errorMessages[roomNumber - 1];
+            }
+        }
+
+        function toggleHint(roomNumber) {
+            const hint = document.getElementById('hint' + roomNumber);
+            hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function showVictory() {
+            clearInterval(timerInterval);
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('finalTime').textContent = 
+                `${minutes} minut${minutes !== 1 ? 'er' : ''} och ${seconds} sekund${seconds !== 1 ? 'er' : ''}`;
+            document.getElementById('victory').classList.add('active');
+        }
+    </script>
+</body>
+</html>

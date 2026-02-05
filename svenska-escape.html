@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Djungelns Mysterier - Svenska Escape Room</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Merriweather:wght@700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lora', serif;
+            background: linear-gradient(135deg, #1a4d2e 0%, #2d5016 25%, #1e5128 50%, #164a29 75%, #0f3d1f 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #e8f5e9;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(76, 175, 80, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(139, 195, 74, 0.15) 0%, transparent 40%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></svg>');
+            pointer-events: none;
+            animation: sway 20s ease-in-out infinite;
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(10px) translateY(5px); }
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: linear-gradient(135deg, rgba(21, 87, 36, 0.95) 0%, rgba(27, 94, 32, 0.95) 100%);
+            border-radius: 30px;
+            box-shadow: 
+                0 30px 90px rgba(0, 0, 0, 0.6),
+                inset 0 0 60px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(139, 195, 74, 0.2);
+            overflow: hidden;
+            border: 3px solid rgba(76, 175, 80, 0.3);
+            position: relative;
+        }
+
+        .container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 100px,
+                rgba(255, 255, 255, 0.02) 100px,
+                rgba(255, 255, 255, 0.02) 200px
+            );
+            pointer-events: none;
+        }
+
+        .leaves {
+            position: absolute;
+            font-size: 3em;
+            opacity: 0.1;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        .leaf1 { top: 10%; left: 5%; animation-delay: 0s; }
+        .leaf2 { top: 30%; right: 8%; animation-delay: 3s; }
+        .leaf3 { bottom: 20%; left: 10%; animation-delay: 6s; }
+        .leaf4 { top: 60%; right: 15%; animation-delay: 9s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(10deg); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, rgba(27, 94, 32, 0.8) 0%, rgba(46, 125, 50, 0.8) 100%);
+            color: #e8f5e9;
+            padding: 50px 40px;
+            text-align: center;
+            border-bottom: 4px solid rgba(139, 195, 74, 0.5);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .header h1 {
+            font-family: 'Merriweather', serif;
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            text-shadow: 
+                3px 3px 6px rgba(0, 0, 0, 0.6),
+                0 0 30px rgba(139, 195, 74, 0.4);
+            letter-spacing: 3px;
+            color: #c5e1a5;
+        }
+
+        .subtitle {
+            font-style: italic;
+            font-size: 1.4em;
+            opacity: 0.9;
+            margin-top: 15px;
+            letter-spacing: 2px;
+        }
+
+        .timer {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #aed581;
+            margin-top: 20px;
+            font-family: 'Merriweather', serif;
+            text-shadow: 0 0 15px rgba(174, 213, 129, 0.5);
+        }
+
+        .content {
+            padding: 60px 50px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .start-screen, .room {
+            display: none;
+        }
+
+        .start-screen.active, .room.active {
+            display: block;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-screen h2 {
+            font-family: 'Merriweather', serif;
+            color: #c5e1a5;
+            margin-bottom: 40px;
+            font-size: 3em;
+            text-shadow: 0 0 25px rgba(197, 225, 165, 0.3);
+            letter-spacing: 2px;
+        }
+
+        .start-screen p {
+            font-size: 1.4em;
+            line-height: 2;
+            margin-bottom: 30px;
+            color: #e8f5e9;
+            text-align: left;
+            padding: 0 30px;
+        }
+
+        .story-box {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid rgba(139, 195, 74, 0.3);
+            margin: 40px 0;
+            border-left: 6px solid #8bc34a;
+            box-shadow: 
+                inset 0 0 30px rgba(0, 0, 0, 0.5),
+                0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #558b2f 0%, #689f38 100%);
+            color: #fff;
+            border: 3px solid #8bc34a;
+            padding: 22px 60px;
+            font-size: 1.5em;
+            font-family: 'Merriweather', serif;
+            cursor: pointer;
+            transition: all 0.4s;
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.4),
+                inset 0 0 25px rgba(255, 255, 255, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 30px;
+            border-radius: 15px;
+            font-weight: 700;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #689f38 0%, #7cb342 100%);
+            box-shadow: 
+                0 10px 30px rgba(139, 195, 74, 0.5),
+                inset 0 0 25px rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+            border-color: #aed581;
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .room h2 {
+            font-family: 'Merriweather', serif;
+            color: #c5e1a5;
+            margin-bottom: 35px;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px rgba(197, 225, 165, 0.3);
+            letter-spacing: 2px;
+            border-bottom: 3px solid rgba(139, 195, 74, 0.3);
+            padding-bottom: 20px;
+        }
+
+        .puzzle {
+            background: rgba(0, 0, 0, 0.35);
+            padding: 35px;
+            border-radius: 15px;
+            margin-bottom: 35px;
+            border: 2px solid rgba(139, 195, 74, 0.2);
+            border-left: 6px solid #8bc34a;
+            box-shadow: 
+                inset 0 0 35px rgba(0, 0, 0, 0.4),
+                0 6px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .puzzle h3 {
+            font-family: 'Merriweather', serif;
+            color: #aed581;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            letter-spacing: 1px;
+        }
+
+        .puzzle p {
+            line-height: 2;
+            margin-bottom: 22px;
+            color: #e8f5e9;
+            font-size: 1.2em;
+        }
+
+        .example-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border-left: 4px solid #aed581;
+            color: #c5e1a5;
+            font-size: 1.15em;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+            line-height: 1.9;
+        }
+
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.3em;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(139, 195, 74, 0.3);
+            border-radius: 10px;
+            margin-bottom: 18px;
+            transition: all 0.3s;
+            color: #e8f5e9;
+            font-family: 'Lora', serif;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select option {
+            background: #1a4d2e;
+            color: #e8f5e9;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #8bc34a;
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 20px rgba(139, 195, 74, 0.3);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(232, 245, 233, 0.5);
+        }
+
+        .feedback {
+            padding: 22px;
+            border-radius: 10px;
+            margin-top: 18px;
+            font-weight: bold;
+            display: none;
+            font-family: 'Merriweather', serif;
+            letter-spacing: 1px;
+            font-size: 1.1em;
+        }
+
+        .feedback.success {
+            background: rgba(76, 175, 80, 0.3);
+            color: #c5e1a5;
+            border: 2px solid #8bc34a;
+            display: block;
+            box-shadow: 0 0 25px rgba(76, 175, 80, 0.4);
+        }
+
+        .feedback.error {
+            background: rgba(211, 47, 47, 0.3);
+            color: #ffcdd2;
+            border: 2px solid #e57373;
+            display: block;
+            box-shadow: 0 0 25px rgba(211, 47, 47, 0.4);
+        }
+
+        .progress {
+            background: rgba(0, 0, 0, 0.6);
+            height: 40px;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 35px;
+            border: 2px solid rgba(139, 195, 74, 0.3);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #558b2f 0%, #689f38 50%, #8bc34a 100%);
+            height: 100%;
+            transition: width 0.6s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            font-family: 'Merriweather', serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 25px rgba(139, 195, 74, 0.5);
+            font-size: 1.1em;
+        }
+
+        .hint-btn {
+            background: rgba(255, 193, 7, 0.3);
+            color: #fff9c4;
+            border: 2px solid #ffd54f;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-top: 18px;
+            transition: all 0.3s;
+            font-family: 'Merriweather', serif;
+            letter-spacing: 1px;
+        }
+
+        .hint-btn:hover {
+            background: rgba(255, 193, 7, 0.5);
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+            transform: scale(1.05);
+        }
+
+        .hint {
+            background: rgba(255, 193, 7, 0.2);
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 18px;
+            border-left: 5px solid #ffd54f;
+            display: none;
+            color: #fff9c4;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
+            line-height: 1.8;
+        }
+
+        .victory {
+            text-align: center;
+            padding: 60px 30px;
+        }
+
+        .victory h2 {
+            color: #c5e1a5;
+            font-size: 4em;
+            margin-bottom: 35px;
+            font-family: 'Merriweather', serif;
+            text-shadow: 0 0 40px rgba(197, 225, 165, 0.5);
+            letter-spacing: 4px;
+        }
+
+        .victory p {
+            font-size: 1.6em;
+            color: #e8f5e9;
+            margin: 25px 0;
+            line-height: 2;
+        }
+
+        .emoji {
+            font-size: 6em;
+            margin: 35px 0;
+            filter: drop-shadow(0 0 25px rgba(139, 195, 74, 0.4));
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .word-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid rgba(139, 195, 74, 0.3);
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #aed581;
+        }
+
+        .sentence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .sentence-option {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 18px;
+            border-radius: 10px;
+            border: 2px solid rgba(139, 195, 74, 0.3);
+            color: #e8f5e9;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2.5em; }
+            .content { padding: 40px 30px; }
+            .sentence-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="leaves leaf1">🌿</div>
+    <div class="leaves leaf2">🍃</div>
+    <div class="leaves leaf3">🌿</div>
+    <div class="leaves leaf4">🍃</div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🌴 DJUNGELNS MYSTERIER 🌴</h1>
+            <div class="subtitle">En Svensk Språkexpedition</div>
+            <div class="timer" id="timer">Tid: 00:00</div>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar" style="width: 0%">Utmaning 0/10</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Start Screen -->
+            <div class="start-screen active" id="startScreen">
+                <h2>Välkommen, Äventyrare!</h2>
+                
+                <div class="story-box">
+                    <p>Du har krupit djupt in i Amazonas' ogenomträngliga djungel, på jakt efter den mytomspunna Språkets Tempel. Enligt legenden vaktas templet av tio prövningar som endast kan lösas av den som behärskar det svenska språket till perfektion.</p>
+                    
+                    <p>Lianerna hänger tätt, papegojorna skriker, och markens fuktighet tränger genom dina stövlar. Men framför dig öppnar sig plötsligt en stenpå väg täckt av gammal mossa – templets ingång!</p>
+                    
+                    <p>Varje rum i templet testar en olika aspekt av det svenska språket: ordklasser, satslära, skiljetecken, ordbildning och mycket mer. Lös alla tio utmaningar för att nå templets hjärta och den kunskap som väntar där.</p>
+                    
+                    <p style="text-align: center; font-style: italic; margin-top: 35px; font-size: 1.2em;">Är du redo att bevisa din språkkunskap?</p>
+                </div>
+                
+                <button class="btn" onclick="startGame()">Träd in i templet</button>
+            </div>
+
+            <!-- Rum 1: Ordklasser - Substantiv -->
+            <div class="room" id="room1">
+                <h2>🗿 Rum 1: Substantivens Sal</h2>
+                <div class="puzzle">
+                    <h3>Identifiera Substantivet</h3>
+                    <p>På väggen står en mening inristad i sten:</p>
+                    
+                    <div class="example-box">
+                        "Den <strong>mystiska</strong> djungeln döljer många <strong>faror</strong> för den <strong>modiga</strong> upptäcktsresanden."
+                    </div>
+                    
+                    <p>Hur många substantiv finns det i meningen? (Räkna alla substantiv)</p>
+                    
+                    <input type="number" id="answer1" placeholder="Skriv ett tal...">
+                    <button class="btn" onclick="checkAnswer(1)">Öppna dörren</button>
+                    <button class="hint-btn" onclick="toggleHint(1)">🌿 Ledtråd</button>
+                    <div class="hint" id="hint1">
+                        <strong>Djungelns visdom:</strong> Substantiv är ord som kan ha en artikel framför sig (en/ett). Titta efter ord som namnger personer, platser eller saker. "Den mystiska" – vad är mystisk? "Många faror" – vad finns det många av?
+                    </div>
+                    <div class="feedback" id="feedback1"></div>
+                </div>
+            </div>
+
+            <!-- Rum 2: Verb - Tempus -->
+            <div class="room" id="room2">
+                <h2>⏰ Rum 2: Tempusets Torn</h2>
+                <div class="puzzle">
+                    <h3>Välj Rätt Tempus</h3>
+                    <p>En inskription behöver kompletteras:</p>
+                    
+                    <div class="example-box">
+                        "Igår __________ jag djupt in i djungeln. Nu __________ jag framför templet. Imorgon __________ jag äntligen lösa mysteriet."
+                    </div>
+                    
+                    <p>Vilka verb passar i följande ordning? (Skriv de tre verben åtskilda med kommatecken)</p>
+                    
+                    <input type="text" id="answer2" placeholder="t.ex. gick, står, ska" style="text-transform: lowercase;">
+                    <button class="btn" onclick="checkAnswer(2)">Lås upp templet</button>
+                    <button class="hint-btn" onclick="toggleHint(2)">🌿 Ledtråd</button>
+                    <div class="hint" id="hint2">
+                        <strong>Djungelns visdom:</strong> Igår = dåtid (preteritum), Nu = nutid (presens), Imorgon = framtid. Tänk på verbet "gå" i olika tidsformer.
+                    </div>
+                    <div class="feedback" id="feedback2"></div>
+                </div>
+            </div>
+
+            <!-- Rum 3: Adjektiv - Komparation -->
+            <div class="room" id="room3">
+                <h2>📊 Rum 3: Komparationens Kammare</h2>
+                <div class="puzzle">
+                    <h3>Graden av Jämförelse</h3>
+                    <p>Tre stenar visar olika former av samma adjektiv:</p>
+                    
+                    <div class="example-box">
+                        Positiv: farlig<br>
+                        Komparativ: farligare<br>
+                        Superlativ: ?
+                    </div>
+                    
+                    <p>Skriv superlativformen av "farlig" (med bestämd artikel):</p>
+                    
+                    <input type="text" id="answer3" placeholder="Ditt svar..." style="text-transform: lowercase;">
+                    <button class="btn" onclick="checkAnswer(3)">Aktivera mekanismen</button>
+                    <button class="hint-btn" onclick="toggleHint(3)">🌿 Ledtråd</button>
+                    <div class="hint" id="hint3">
+                        <strong>Djungelns visdom:</strong> Superlativ i bestämd form slutar ofta på "-aste" eller "-ste". Tänk: "den farlig___?"
+                    </div>
+                    <div class="feedback" id="feedback3"></div>
+                </div>
+            </div>
+
+            <!-- Rum 4: Skiljetecken -->
+            <div class="room" id="room4">
+                <h2>📝 Rum 4: Skiljetecknens Gång</h2>
+                <div class="puzzle">
+                    <h3>Sätt Ut Rätt Tecken</h3>
+                    <p>En mening saknar skiljetecken:</p>
+                    
+                    <div class="example-box">
+                        "Djungeln är vacker grön och farlig"
+                    </div>
+                    
+                    <p>Vilket skiljetecken ska stå efter "vacker"?</p>
+                    
+                    <select id="answer4">
+                        <option value="">Välj tecken...</option>
+                        <option value="komma">Komma (,)</option>
+                        <option value="punkt">Punkt (.)</option>
+                        <option value="semikolon">Semikolon (;)</option>
+                        <option value="kolon">Kolon (:)</option>
+                        <option value="inget">Inget tecken</option>
+                    </select>
+                    
+                    <button class="btn" onclick="checkAnswer(4)">Rätta meningen</button>
+                    <button class="hint-btn" onclick="toggleHint(4)">🌿 Ledtråd</button>
+                    <div class="hint" id="hint4">
+                        <strong>Djungelns visdom:</strong> När man räknar upp flera adjektiv behöver man skilja dem åt. "Vacker, grön och farlig" – tre egenskaper!
+                    </div>
+                    <div class="feedback" id="feedback4"></div>
+                </div>
+            </div>
+
+            <!-- Rum 5: Sammansatta ord -->
+            <div class="room" id="room5">
+                <h2>🔗 Rum 5: Sammansättningens Sal</h2>
+                <div class="puzzle">
+                    <h3>Bygg Ordet</h3>
+                    <p>Två ord väntar på att förenas:</p>
+                    
+                    <div class="word-box">
+                        DJUNGEL + VÄG = ?
+                    </div>
+                    
+                    <p>Skriv det sammansatta ordet:</p>
+                    
+                    <input type="text" id="answer5" placeholder="Ditt svar..." style="text-transform: lowercase;">
+                    <button class="btn" onclick="checkAnswer(5)">Sammanfoga orden</button>
+                    <button class="hint-btn" onclick="toggleHint(5)">🌿 Ledtråd</button>
+                    <div class="hint" id="hint5">
+                        <strong>Djungelns visdom:</strong> När du sätter ihop två svenska ord blir de ett ord utan mellanrum. Tänk på hur "djungel" och "väg" låter tillsammans!
+                    </div>
+                    <div class="feedback" id="feedback5"></div>
+                </div>
+            </div>
+
+            <!-- Rum 6: Pronomen -->
+            <div class="room" id="room6">
+                <h2>👤 Rum 6: Pronomenets Portal</h2>
+                <div class="puzzle">
+                    <h3>Ersätt Rätt</h3>
+                    <p>Vilken mening använder pronomenet korrekt?</p>
+                    
+                    <div class="sentence-grid">
+                        <div class="sentence-option">A) Templet är gammalt. Han är mystiskt.</div>
+                        <div class="sentence-option">B) Templet är gammalt. Den är mystisk.</div>
+                        <div class="sentence-option">C) Templet är gammalt. Det är mystiskt.</div>
+                        <div class="sentence-option">D) Templet är gammalt. De är mystiska.</div>
+                    </div>
+                    
+                    <select id="answer6">
+                        <option value="">Välj alternativ...</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                    </select>
+                    
+                    <button class="btn" onclick="checkAnswer(6)">Öppna portalen</button>
+                    <button class="hint-btn" onclick="toggleHint(6)">🌿 Ledtråd</button>
+                    <div class="hint" id="hint6">
+                        <strong>Djungelns visdom:</strong> "Templet" är en sak (inte en person) och är singular (inte plural). Vilket pronomen passar för ett ting i singular? Det är också ett neutrum-ord (ett tempel).
+                    </div>
+                    <div class="feedback" id="feedback6"></div>
+                </div>
+            </div>
+
+            <!-- Rum 7: Huvudsats och Bisats -->
+            <div class="room" id="room7">
+                <h2>🔀 Rum 7: Satsernas Helgedom</h2>
+                <div class="puzzle">
+                    <h3>Identifiera Bisatsen</h3>
+                    <p>I följande mening finns en bisats:</p>
+                    
+                    <div class="example-box">
+                        "Vi fortsatte vandringen <strong>trots att</strong> det började regna."
+                    </div>
+                    
+                    <p>Skriv endast bisatsen (utan subjunktionen):</p>
+                    
+                    <input type="text" id="answer7" placeholder="t.ex. det..." style="text-transform: lowercase;">
+                    <button class="btn" onclick="checkAnswer(7)">Lös gåtan</button>
+                    <button class="hint-btn" onclick="toggleHint(7)">🌿 Ledtråd</button>
+                    <div class="hint" id="hint7">
+                        <strong>Djungelns visdom:</strong> En bisats inleds ofta med subjunktioner som "att", "när", "om", "eftersom", "trots att". Bisatsen är den del som kommer efter "trots att".
+                    </div>
+                    <div class="feedback" id="feedback7"></div>
+                </div>
+            </div>
+
+            <!-- Rum 8: Prefix och Suffix -->
+            <div class="room" id="room8">
+                <h2>🔤 Rum 8: Affixens Arkiv</h2>
+                <div class="puzzle">
+                    <h3>Omvandla Ordet</h3>
+                    <p>Grundordet är: <strong>LYCKLIG</strong></p>
+                    
+                    <p>Skapa motsatsen genom att lägga till ett prefix:</p>
+                    
+                    <input type="text" id="answer8" placeholder="Ditt svar..." style="text-transform: lowercase;">
+                    <button class="btn" onclick="checkAnswer(8)">Omforma ordet</button>
+                    <button class="hint-btn" onclick="toggleHint(8)">🌿 Ledtråd</button>
+                    <div class="hint" id="hint8">
+                        <strong>Djungelns visdom:</strong> Prefix som "o-" kan skapa motsatsen till ett adjektiv. T.ex. "möjlig" blir "omöjlig".
+                    </div>
+                    <div class="feedback" id="feedback8"></div>
+                </div>
+            </div>
+
+            <!-- Rum 9: Synonymer -->
+            <div class="room" id="room9">
+                <h2>🔄 Rum 9: Synonymernas Sanktuarium</h2>
+                <div class="puzzle">
+                    <h3>Hitta Liknande Ord</h3>
+                    <p>Vilket ord betyder nästan samma sak som <strong>ENORM</strong>?</p>
+                    
+                    <select id="answer9">
+                        <option value="">Välj synonym...</option>
+                        <option value="liten">Liten</option>
+                        <option value="enkel">Enkel</option>
+                        <option value="gigantisk">Gigantisk</option>
+                        <option value="konstig">Konstig</option>
+                        <option value="vanlig">Vanlig</option>
+                    </select>
+                    
+                    <button class="btn" onclick="checkAnswer(9)">Bekräfta valet</button>
+                    <button class="hint-btn" onclick="toggleHint(9)">🌿 Ledtråd</button>
+                    <div class="hint" id="hint9">
+                        <strong>Djungelns visdom:</strong> "Enorm" betyder mycket stor. Vilken av alternativen betyder också "mycket stor"?
+                    </div>
+                    <div class="feedback" id="feedback9"></div>
+                </div>
+            </div>
+
+            <!-- Rum 10: Meningsbyggnad -->
+            <div class="room" id="room10">
+                <h2>🏛 Rum 10: Meningens Mästerprövning</h2>
+                <div class="puzzle">
+                    <h3>Den Kompletta Meningen</h3>
+                    <p>Skapa en fullständig mening med följande delar:</p>
+                    
+                    <div class="example-box">
+                        SUBJEKT: Upptäcktsresanden<br>
+                        VERB: hittade<br>
+                        OBJEKT: skatten
+                    </div>
+                    
+                    <p>Hur många satsdelar måste en fullständig mening minst ha?</p>
+                    
+                    <select id="answer10">
+                        <option value="">Välj antal...</option>
+                        <option value="1">1 (bara subjekt)</option>
+                        <option value="2">2 (subjekt + verb)</option>
+                        <option value="3">3 (subjekt + verb + objekt)</option>
+                        <option value="4">4 (alla delar krävs)</option>
+                    </select>
+                    
+                    <button class="btn" onclick="checkAnswer(10)">Slutför templet!</button>
+                    <button class="hint-btn" onclick="toggleHint(10)">🌿 Ledtråd</button>
+                    <div class="hint" id="hint10">
+                        <strong>Djungelns visdom:</strong> En fullständig mening måste alltid ha minst två grundläggande delar: vem/vad som gör något (subjekt) och vad som görs (verb). T.ex. "Fågeln flyger."
+                    </div>
+                    <div class="feedback" id="feedback10"></div>
+                </div>
+            </div>
+
+            <!-- Victory Screen -->
+            <div class="room" id="victory">
+                <div class="victory">
+                    <div class="emoji">🏆🌴</div>
+                    <h2>DU HAR KLARAT DET!</h2>
+                    <p>Templets sista dörr öppnas och ljuset strömmar in. Du har bevisat din behärskning av det svenska språket!</p>
+                    
+                    <div class="example-box" style="margin: 40px 0;">
+                        "Språket är nyckeln till all kunskap. Den som behärskar orden behärskar världen."
+                        <div style="text-align: right; margin-top: 15px; font-style: italic;">— Templets inskription</div>
+                    </div>
+                    
+                    <p><strong>Din tid:</strong> <span id="finalTime"></span></p>
+                    
+                    <p style="font-style: italic; margin-top: 35px;">Du bär nu med dig Språkets Tempel visdom!</p>
+                    
+                    <button class="btn" onclick="location.reload()">Utforska templet igen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const answers = {
+            1: 3,                           // djungeln, faror, upptäcktsresanden
+            2: 'gick,står,ska',            // eller varianter
+            3: 'farligaste',               // eller "den farligaste"
+            4: 'komma',
+            5: 'djungelväg',
+            6: 'C',
+            7: 'det började regna',
+            8: 'olycklig',
+            9: 'gigantisk',
+            10: '2'
+        };
+
+        let currentRoom = 0;
+        let solvedRooms = 0;
+        let startTime;
+        let timerInterval;
+
+        function startGame() {
+            document.getElementById('startScreen').classList.remove('active');
+            currentRoom = 1;
+            showRoom(1);
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function showRoom(roomNumber) {
+            document.getElementById('room' + roomNumber).classList.add('active');
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('timer').textContent = `Tid: ${minutes}:${seconds}`;
+        }
+
+        function updateProgress() {
+            const percentage = (solvedRooms / 10) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressBar').textContent = `Utmaning ${solvedRooms}/10`;
+        }
+
+        function checkAnswer(roomNumber) {
+            let userAnswer;
+            const element = document.getElementById('answer' + roomNumber);
+            
+            if (element.tagName === 'SELECT') {
+                userAnswer = element.value.toLowerCase().trim();
+            } else {
+                userAnswer = element.value.toLowerCase().trim();
+            }
+            
+            let correctAnswer = answers[roomNumber];
+            if (typeof correctAnswer === 'string') {
+                correctAnswer = correctAnswer.toLowerCase().trim();
+            }
+            
+            const feedback = document.getElementById('feedback' + roomNumber);
+
+            // Special handling for room 2 (verb tenses)
+            if (roomNumber === 2) {
+                const acceptable = ['gick,står,ska', 'gick,står,kommer', 'vandrade,står,ska'];
+                if (acceptable.some(ans => userAnswer === ans)) {
+                    userAnswer = correctAnswer;
+                }
+            }
+
+            // Special handling for room 3 (superlative)
+            if (roomNumber === 3) {
+                if (userAnswer === 'farligaste' || userAnswer === 'den farligaste') {
+                    userAnswer = correctAnswer;
+                }
+            }
+
+            // Special handling for room 7 (bisats)
+            if (roomNumber === 7) {
+                if (userAnswer.includes('det började regna') || userAnswer === 'det började regna') {
+                    userAnswer = correctAnswer;
+                }
+            }
+
+            if (userAnswer == correctAnswer) {
+                feedback.className = 'feedback success';
+                const messages = [
+                    '✓ Rätt! Substantivens sal öppnar sig...',
+                    '✓ Perfekt tempus! Tornet släpper dig vidare...',
+                    '✓ Korrekt komparation! Kammaren är din...',
+                    '✓ Rätt skiljetecken! Gången öppnas...',
+                    '✓ Ordet är komplett! Salen lyser upp...',
+                    '✓ Pronomenet är rätt! Portalen aktiveras...',
+                    '✓ Bisatsen identifierad! Helgedomen öppnar sig...',
+                    '✓ Prefixet är perfekt! Arkivet välkomnar dig...',
+                    '✓ Synonymen hittas! Sanktuariumet är ditt...',
+                    '✓ Du förstår meningens byggnad! Templet är klarat!'
+                ];
+                feedback.textContent = messages[roomNumber - 1];
+                solvedRooms++;
+                updateProgress();
+
+                setTimeout(() => {
+                    document.getElementById('room' + roomNumber).classList.remove('active');
+                    if (roomNumber < 10) {
+                        currentRoom = roomNumber + 1;
+                        showRoom(currentRoom);
+                    } else {
+                        showVictory();
+                    }
+                }, 2000);
+            } else {
+                feedback.className = 'feedback error';
+                const errorMessages = [
+                    '✗ Inte korrekt. Räkna substantiven igen...',
+                    '✗ Fel tempus. Tänk på tidsangivelserna...',
+                    '✗ Fel form. Tänk på superlativets ändelse...',
+                    '✗ Fel tecken. Hur skiljer man adjektiv åt?',
+                    '✗ Inte rätt. Sätt ihop orden utan mellanrum...',
+                    '✗ Fel pronomen. Tänk på genus och numerus...',
+                    '✗ Inte korrekt. Bisatsen kommer efter subjunktionen...',
+                    '✗ Fel prefix. Vilket ger motsatsen?',
+                    '✗ Inte rätt synonym. Tänk på betydelsen...',
+                    '✗ Fel antal. Minsta antalet för en fullständig mening?'
+                ];
+                feedback.textContent = errorMessages[roomNumber - 1];
+            }
+        }
+
+        function toggleHint(roomNumber) {
+            const hint = document.getElementById('hint' + roomNumber);
+            hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function showVictory() {
+            clearInterval(timerInterval);
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('finalTime').textContent = 
+                `${minutes} minut${minutes !== 1 ? 'er' : ''} och ${seconds} sekund${seconds !== 1 ? 'er' : ''}`;
+            document.getElementById('victory').classList.add('active');
+        }
+    </script>
+</body>
+</html>
