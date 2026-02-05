@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Forbidden Library - English Escape Room</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #d4c5b9;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(128, 0, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: linear-gradient(135deg, #1c1410 0%, #2a1f1a 100%);
+            border-radius: 0;
+            box-shadow: 
+                0 0 50px rgba(0, 0, 0, 0.9),
+                inset 0 0 30px rgba(0, 0, 0, 0.5),
+                0 0 100px rgba(139, 69, 19, 0.2);
+            overflow: hidden;
+            border: 2px solid #4a3728;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.1) 2px,
+                    rgba(0, 0, 0, 0.1) 4px
+                );
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f0a08 0%, #1a0f0a 100%);
+            color: #d4c5b9;
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 3px solid #8b4513;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        .header::after {
+            content: '📚';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5em;
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.8),
+                0 0 20px rgba(139, 69, 19, 0.5);
+            letter-spacing: 3px;
+            color: #d4c5b9;
+        }
+
+        .subtitle {
+            font-style: italic;
+            font-size: 1.2em;
+            opacity: 0.8;
+            margin-top: 10px;
+            letter-spacing: 1px;
+        }
+
+        .timer {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #c9a961;
+            margin-top: 15px;
+            font-family: 'Cinzel', serif;
+            text-shadow: 0 0 10px rgba(201, 169, 97, 0.5);
+        }
+
+        .content {
+            padding: 50px 40px;
+            position: relative;
+        }
+
+        .start-screen, .room {
+            display: none;
+        }
+
+        .start-screen.active, .room.active {
+            display: block;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-screen h2 {
+            font-family: 'Cinzel', serif;
+            color: #c9a961;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px rgba(201, 169, 97, 0.3);
+            letter-spacing: 2px;
+        }
+
+        .start-screen p {
+            font-size: 1.3em;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            color: #d4c5b9;
+            text-align: left;
+            padding: 0 20px;
+        }
+
+        .story-box {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border-radius: 5px;
+            border: 1px solid #4a3728;
+            margin: 30px 0;
+            border-left: 4px solid #8b4513;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4a3728 0%, #6b4f3a 100%);
+            color: #d4c5b9;
+            border: 2px solid #8b4513;
+            padding: 18px 50px;
+            font-size: 1.3em;
+            font-family: 'Cinzel', serif;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.5),
+                inset 0 0 20px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #6b4f3a 0%, #8b6f47 100%);
+            box-shadow: 
+                0 6px 20px rgba(139, 69, 19, 0.6),
+                inset 0 0 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            border-color: #c9a961;
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .room h2 {
+            font-family: 'Cinzel', serif;
+            color: #c9a961;
+            margin-bottom: 30px;
+            font-size: 2em;
+            text-shadow: 0 0 15px rgba(201, 169, 97, 0.3);
+            letter-spacing: 2px;
+            border-bottom: 2px solid #4a3728;
+            padding-bottom: 15px;
+        }
+
+        .puzzle {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            border: 1px solid #4a3728;
+            border-left: 5px solid #8b4513;
+            box-shadow: 
+                inset 0 0 30px rgba(0, 0, 0, 0.5),
+                0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .puzzle h3 {
+            font-family: 'Cinzel', serif;
+            color: #c9a961;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            letter-spacing: 1px;
+        }
+
+        .puzzle p {
+            line-height: 1.8;
+            margin-bottom: 18px;
+            color: #d4c5b9;
+            font-size: 1.15em;
+        }
+
+        .quote {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 25px;
+            border-radius: 3px;
+            margin: 20px 0;
+            font-style: italic;
+            border-left: 3px solid #c9a961;
+            color: #e5d4c1;
+            font-size: 1.2em;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+            line-height: 1.8;
+        }
+
+        .quote-author {
+            text-align: right;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #c9a961;
+            font-style: normal;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #4a3728;
+            border-radius: 3px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            color: #d4c5b9;
+            font-family: 'Crimson Text', serif;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select option {
+            background: #1c1410;
+            color: #d4c5b9;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #8b4513;
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 15px rgba(139, 69, 19, 0.3);
+        }
+
+        input::placeholder {
+            color: #6b5d52;
+        }
+
+        .feedback {
+            padding: 18px;
+            border-radius: 3px;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+        }
+
+        .feedback.success {
+            background: rgba(34, 139, 34, 0.2);
+            color: #90ee90;
+            border: 1px solid #228b22;
+            display: block;
+            box-shadow: 0 0 20px rgba(34, 139, 34, 0.3);
+        }
+
+        .feedback.error {
+            background: rgba(139, 0, 0, 0.2);
+            color: #ff6b6b;
+            border: 1px solid #8b0000;
+            display: block;
+            box-shadow: 0 0 20px rgba(139, 0, 0, 0.3);
+        }
+
+        .progress {
+            background: rgba(0, 0, 0, 0.6);
+            height: 35px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            border: 2px solid #4a3728;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #4a3728 0%, #8b4513 50%, #c9a961 100%);
+            height: 100%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d4c5b9;
+            font-weight: bold;
+            font-family: 'Cinzel', serif;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 20px rgba(201, 169, 97, 0.4);
+        }
+
+        .hint-btn {
+            background: rgba(139, 69, 19, 0.3);
+            color: #c9a961;
+            border: 1px solid #8b4513;
+            padding: 10px 25px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 15px;
+            transition: all 0.3s;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+        }
+
+        .hint-btn:hover {
+            background: rgba(139, 69, 19, 0.5);
+            box-shadow: 0 0 15px rgba(139, 69, 19, 0.5);
+        }
+
+        .hint {
+            background: rgba(139, 69, 19, 0.2);
+            padding: 20px;
+            border-radius: 3px;
+            margin-top: 15px;
+            border-left: 4px solid #8b4513;
+            display: none;
+            color: #e5d4c1;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .victory {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .victory h2 {
+            color: #c9a961;
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            font-family: 'Cinzel', serif;
+            text-shadow: 0 0 30px rgba(201, 169, 97, 0.5);
+            letter-spacing: 3px;
+        }
+
+        .victory p {
+            font-size: 1.4em;
+            color: #d4c5b9;
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+
+        .emoji {
+            font-size: 5em;
+            margin: 30px 0;
+            filter: drop-shadow(0 0 20px rgba(201, 169, 97, 0.3));
+        }
+
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .word-option {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 3px;
+            border: 2px solid #4a3728;
+            color: #d4c5b9;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .passage {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 25px;
+            border-radius: 3px;
+            margin: 20px 0;
+            border: 2px solid #4a3728;
+            color: #e5d4c1;
+            font-size: 1.1em;
+            line-height: 1.9;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .sentence-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 3px;
+            margin: 15px 0;
+            border-left: 3px solid #c9a961;
+            font-size: 1.15em;
+            line-height: 1.7;
+        }
+
+        .underline {
+            border-bottom: 2px dotted #c9a961;
+            padding-bottom: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .word-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 THE FORBIDDEN LIBRARY 📚</h1>
+            <div class="subtitle">An English Language Escape</div>
+            <div class="timer" id="timer">Time Elapsed: 00:00</div>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar" style="width: 0%">Chamber 0/5</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Start Screen -->
+            <div class="start-screen active" id="startScreen">
+                <h2>Welcome, Young Scholar</h2>
+                
+                <div class="story-box">
+                    <p>You have stumbled upon the Forbidden Library, a secret repository of knowledge hidden deep within the castle walls. The ancient librarian, a master of the English language, has trapped you here to test your linguistic prowess.</p>
+                    
+                    <p>Five chambers of literary challenges await you. Each door is locked by puzzles that test your grammar, vocabulary, comprehension, and wit. Only those who truly understand the English language may escape.</p>
+                    
+                    <p>The candles burn low, and the shadows grow long. You must prove your mastery of words before the library claims you as its own forever...</p>
+                    
+                    <p style="text-align: center; font-style: italic; margin-top: 30px;">Can you unlock the secrets hidden in language itself?</p>
+                </div>
+                
+                <button class="btn" onclick="startGame()">Enter the Library</button>
+            </div>
+
+            <!-- Chamber 1: Grammar - Parts of Speech -->
+            <div class="room" id="room1">
+                <h2>📖 Chamber I: The Grammar Hall</h2>
+                <div class="puzzle">
+                    <h3>The Ancient Inscription</h3>
+                    <p>Upon the wall, a sentence glows with mysterious light:</p>
+                    
+                    <div class="sentence-box">
+                        "The <span class="underline">mysterious</span> scholar quietly discovered an ancient manuscript in the dusty library."
+                    </div>
+                    
+                    <p>What part of speech is the underlined word "<strong>mysterious</strong>"?</p>
+                    
+                    <select id="answer1">
+                        <option value="">Select your answer...</option>
+                        <option value="noun">Noun</option>
+                        <option value="verb">Verb</option>
+                        <option value="adjective">Adjective</option>
+                        <option value="adverb">Adverb</option>
+                        <option value="pronoun">Pronoun</option>
+                    </select>
+                    
+                    <button class="btn" onclick="checkAnswer(1)">Unlock the Door</button>
+                    <button class="hint-btn" onclick="toggleHint(1)">🕯 Seek Wisdom</button>
+                    <div class="hint" id="hint1">
+                        <strong>Ancient Wisdom:</strong> This word describes or modifies the noun "scholar." What kind of word describes a noun?
+                    </div>
+                    <div class="feedback" id="feedback1"></div>
+                </div>
+            </div>
+
+            <!-- Chamber 2: Vocabulary - Synonyms -->
+            <div class="room" id="room2">
+                <h2>📜 Chamber II: The Vault of Words</h2>
+                <div class="puzzle">
+                    <h3>The Synonym Cipher</h3>
+                    <p>A scroll appears before you with a challenge:</p>
+                    
+                    <div class="quote">
+                        "Find the word that means most nearly the same as <strong>MELANCHOLY</strong>"
+                    </div>
+                    
+                    <div class="word-grid">
+                        <div class="word-option">Joyful</div>
+                        <div class="word-option">Sorrowful</div>
+                        <div class="word-option">Energetic</div>
+                        <div class="word-option">Confused</div>
+                    </div>
+                    
+                    <p>Enter your answer below:</p>
+                    <input type="text" id="answer2" placeholder="Type the correct word..." style="text-transform: lowercase;">
+                    
+                    <button class="btn" onclick="checkAnswer(2)">Open the Vault</button>
+                    <button class="hint-btn" onclick="toggleHint(2)">🕯 Seek Wisdom</button>
+                    <div class="hint" id="hint2">
+                        <strong>Ancient Wisdom:</strong> Melancholy describes a feeling of deep sadness or gloom. Which word captures this same emotion?
+                    </div>
+                    <div class="feedback" id="feedback2"></div>
+                </div>
+            </div>
+
+            <!-- Chamber 3: Tenses -->
+            <div class="room" id="room3">
+                <h2>⏳ Chamber III: The Temporal Gate</h2>
+                <div class="puzzle">
+                    <h3>The Tense of Time</h3>
+                    <p>Time itself bends before you. Complete this sentence correctly:</p>
+                    
+                    <div class="sentence-box">
+                        "By the time you arrived, the scholars __________ the ancient texts."
+                    </div>
+                    
+                    <p>Choose the correct verb form:</p>
+                    
+                    <select id="answer3">
+                        <option value="">Select your answer...</option>
+                        <option value="have translated">have translated</option>
+                        <option value="had translated">had translated</option>
+                        <option value="translated">translated</option>
+                        <option value="will translate">will translate</option>
+                    </select>
+                    
+                    <button class="btn" onclick="checkAnswer(3)">Pass Through Time</button>
+                    <button class="hint-btn" onclick="toggleHint(3)">🕯 Seek Wisdom</button>
+                    <div class="hint" id="hint3">
+                        <strong>Ancient Wisdom:</strong> The translation happened BEFORE you arrived. Which tense expresses an action completed before another past action? (Past Perfect)
+                    </div>
+                    <div class="feedback" id="feedback3"></div>
+                </div>
+            </div>
+
+            <!-- Chamber 4: Reading Comprehension -->
+            <div class="room" id="room4">
+                <h2>🔍 Chamber IV: The Comprehension Chamber</h2>
+                <div class="puzzle">
+                    <h3>The Secret Passage</h3>
+                    <p>Read this passage from a forbidden tome:</p>
+                    
+                    <div class="passage">
+                        The old librarian had spent decades collecting rare manuscripts from across the realm. Though many believed his collection to be worthless, he knew that within these dusty pages lay secrets that could change the world. However, he also understood the danger they posed if they fell into the wrong hands. Thus, he created an elaborate system of puzzles to protect them, ensuring that only those with true wisdom could access the knowledge within.
+                    </div>
+                    
+                    <p>What was the librarian's main motivation for creating the puzzles?</p>
+                    
+                    <select id="answer4">
+                        <option value="">Select your answer...</option>
+                        <option value="to prove he was clever">To prove he was clever</option>
+                        <option value="to protect dangerous knowledge">To protect dangerous knowledge from unworthy people</option>
+                        <option value="to make money">To make money from visitors</option>
+                        <option value="to keep people away">To keep all people away from the books</option>
+                    </select>
+                    
+                    <button class="btn" onclick="checkAnswer(4)">Reveal the Truth</button>
+                    <button class="hint-btn" onclick="toggleHint(4)">🕯 Seek Wisdom</button>
+                    <div class="hint" id="hint4">
+                        <strong>Ancient Wisdom:</strong> Look for the sentence that explains WHY he created the puzzles. What danger did he want to prevent?
+                    </div>
+                    <div class="feedback" id="feedback4"></div>
+                </div>
+            </div>
+
+            <!-- Chamber 5: Idioms and Figurative Language -->
+            <div class="room" id="room5">
+                <h2>🎭 Chamber V: The Hall of Metaphors</h2>
+                <div class="puzzle">
+                    <h3>The Final Riddle</h3>
+                    <p>The ancient librarian speaks through the shadows:</p>
+                    
+                    <div class="quote">
+                        "I told him not to spill the beans about our secret library, but he let the cat out of the bag anyway."
+                        <div class="quote-author">— The Ancient Librarian</div>
+                    </div>
+                    
+                    <p>What does the idiom "<strong>let the cat out of the bag</strong>" mean in this context?</p>
+                    
+                    <select id="answer5">
+                        <option value="">Select your answer...</option>
+                        <option value="released an animal">Released an animal from a container</option>
+                        <option value="revealed a secret">Revealed a secret accidentally</option>
+                        <option value="made a mistake">Made a careless mistake</option>
+                        <option value="caused trouble">Caused trouble on purpose</option>
+                    </select>
+                    
+                    <button class="btn" onclick="checkAnswer(5)">Escape to Freedom!</button>
+                    <button class="hint-btn" onclick="toggleHint(5)">🕯 Seek Wisdom</button>
+                    <div class="hint" id="hint5">
+                        <strong>Ancient Wisdom:</strong> Notice that "spill the beans" and "let the cat out of the bag" are used together. They both mean the same thing in this context. What happens when a secret is no longer secret?
+                    </div>
+                    <div class="feedback" id="feedback5"></div>
+                </div>
+            </div>
+
+            <!-- Victory Screen -->
+            <div class="room" id="victory">
+                <div class="victory">
+                    <div class="emoji">📚✨</div>
+                    <h2>FREEDOM THROUGH KNOWLEDGE!</h2>
+                    <p>The ancient doors swing open, and the librarian's voice echoes through the chamber:</p>
+                    
+                    <div class="quote">
+                        "You have proven yourself worthy, young scholar. Your mastery of the English language has set you free. Remember: words are the most powerful tools we possess—use them wisely."
+                    </div>
+                    
+                    <p><strong>Your Escape Time:</strong> <span id="finalTime"></span></p>
+                    
+                    <p style="font-style: italic; margin-top: 30px;">"The limits of my language mean the limits of my world." <br>— Ludwig Wittgenstein</p>
+                    
+                    <button class="btn" onclick="location.reload()">Return to the Library</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const answers = {
+            1: 'adjective',
+            2: 'sorrowful',
+            3: 'had translated',
+            4: 'to protect dangerous knowledge',
+            5: 'revealed a secret'
+        };
+
+        let currentRoom = 0;
+        let solvedRooms = 0;
+        let startTime;
+        let timerInterval;
+
+        function startGame() {
+            document.getElementById('startScreen').classList.remove('active');
+            currentRoom = 1;
+            showRoom(1);
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function showRoom(roomNumber) {
+            document.getElementById('room' + roomNumber).classList.add('active');
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('timer').textContent = `Time Elapsed: ${minutes}:${seconds}`;
+        }
+
+        function updateProgress() {
+            const percentage = (solvedRooms / 5) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressBar').textContent = `Chamber ${solvedRooms}/5`;
+        }
+
+        function checkAnswer(roomNumber) {
+            let userAnswer;
+            const element = document.getElementById('answer' + roomNumber);
+            
+            if (element.tagName === 'SELECT') {
+                userAnswer = element.value.toLowerCase().trim();
+            } else {
+                userAnswer = element.value.toLowerCase().trim();
+            }
+            
+            const correctAnswer = answers[roomNumber].toLowerCase().trim();
+            const feedback = document.getElementById('feedback' + roomNumber);
+
+            if (userAnswer === correctAnswer) {
+                feedback.className = 'feedback success';
+                const messages = [
+                    '✓ Correct! The grammar reveals its secrets...',
+                    '✓ Well done! The vault opens before you...',
+                    '✓ Perfect! Time bends to your understanding...',
+                    '✓ Excellent comprehension! The passage is clear...',
+                    '✓ Masterful! The final door unlocks...'
+                ];
+                feedback.textContent = messages[roomNumber - 1];
+                solvedRooms++;
+                updateProgress();
+
+                setTimeout(() => {
+                    document.getElementById('room' + roomNumber).classList.remove('active');
+                    if (roomNumber < 5) {
+                        currentRoom = roomNumber + 1;
+                        showRoom(currentRoom);
+                    } else {
+                        showVictory();
+                    }
+                }, 2000);
+            } else {
+                feedback.className = 'feedback error';
+                const errorMessages = [
+                    '✗ Not quite. Consider what describes a noun...',
+                    '✗ Incorrect. Think about the emotion behind "melancholy"...',
+                    '✗ Wrong tense. When did the translation happen?',
+                    '✗ Reread carefully. What was his TRUE motivation?',
+                    '✗ Try again. What happens to secrets in this phrase?'
+                ];
+                feedback.textContent = errorMessages[roomNumber - 1];
+            }
+        }
+
+        function toggleHint(roomNumber) {
+            const hint = document.getElementById('hint' + roomNumber);
+            hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function showVictory() {
+            clearInterval(timerInterval);
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('finalTime').textContent = 
+                `${minutes} minute${minutes !== 1 ? 's' : ''} and ${seconds} second${seconds !== 1 ? 's' : ''}`;
+            document.getElementById('victory').classList.add('active');
+        }
+    </script>
+</body>
+</html>

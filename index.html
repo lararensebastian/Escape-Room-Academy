@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IM Virginskas Escape Rooms - Välj ditt äventyr</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #5f3dc4 0%, #7c3aed 25%, #8b5cf6 50%, #a78bfa 75%, #7c3aed 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4em;
+            color: white;
+            text-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.3),
+                0 0 40px rgba(255, 255, 255, 0.2);
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 300;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: rgba(255, 255, 255, 0.85);
+            margin-top: 10px;
+            font-weight: 300;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 
+                0 30px 80px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            opacity: 0.1;
+            transition: opacity 0.4s;
+        }
+
+        .card:hover .card-header::before {
+            opacity: 0.2;
+        }
+
+        .card-icon {
+            font-size: 5em;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+            transition: transform 0.4s;
+        }
+
+        .card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .card-body {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .card-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .card-description {
+            font-size: 1em;
+            color: #718096;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .card-level {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .card-link {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #7c3aed 0%, #5f3dc4 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+        }
+
+        .card-link:hover {
+            box-shadow: 0 6px 25px rgba(124, 58, 237, 0.6);
+            transform: translateY(-2px);
+        }
+
+        /* Subject-specific colors */
+        .math .card-header {
+            background: linear-gradient(135deg, #7c3aed 0%, #5f3dc4 100%);
+        }
+
+        .math .card-link {
+            background: linear-gradient(135deg, #7c3aed 0%, #5f3dc4 100%);
+        }
+
+        .swedish .card-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .swedish .card-link {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .english .card-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .english .card-link {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .social .card-header {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .social .card-link {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .coming-soon {
+            position: relative;
+        }
+
+        .coming-soon::after {
+            content: 'KOMMER SNART';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #fbbf24;
+            color: #92400e;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(251, 191, 36, 0.4);
+            letter-spacing: 1px;
+        }
+
+        .coming-soon .card-link {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .coming-soon .card-link:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            color: rgba(255, 255, 255, 0.9);
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .footer p {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer-links {
+            margin-top: 20px;
+        }
+
+        .footer-link {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+            transition: color 0.3s;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer-link:hover {
+            color: white;
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5em;
+            }
+
+            .header p {
+                font-size: 1.1em;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .card-header {
+                height: 140px;
+            }
+
+            .card-icon {
+                font-size: 4em;
+            }
+        }
+
+        /* Floating animation for decorative elements */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 15px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 20px;
+            font-size: 0.85em;
+            color: #059669;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .status-badge::before {
+            content: '●';
+            color: #10b981;
+            font-size: 1.2em;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="floating">🎓 IM Virginskas Escape Rooms</h1>
+            <p>Välj ditt äventyr och testa dina kunskaper!</p>
+            <p class="subtitle">Utmana dig själv i olika ämnen genom spännande escape rooms</p>
+        </div>
+
+        <div class="grid">
+            <!-- Matematik -->
+            <div class="card math">
+                <div class="card-header">
+                    <div class="card-icon">🔢</div>
+                </div>
+                <div class="card-body">
+                    <div class="status-badge">Tillgänglig</div>
+                    <h2 class="card-title">Matematik</h2>
+                    <div class="card-level">Årskurs 7-9</div>
+                    <p class="card-description">
+                        Lös matematiska gåtor och ta dig ut ur det mystiska rummet! Testa dina kunskaper i ekvationer, procent, geometri och mycket mer.
+                    </p>
+                    <a href="index.html" class="card-link">Starta äventyret →</a>
+                </div>
+            </div>
+
+            <!-- Svenska -->
+            <div class="card swedish coming-soon">
+                <div class="card-header">
+                    <div class="card-icon">📚</div>
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title">Svenska</h2>
+                    <div class="card-level">Årskurs 7-9</div>
+                    <p class="card-description">
+                        Utforska språkets hemligheter! Lös grammatikpussel, ordgåtor och litterära utmaningar för att fly från biblioteket.
+                    </p>
+                    <a href="#" class="card-link" onclick="return false;">Kommer snart</a>
+                </div>
+            </div>
+
+            <!-- Engelska -->
+            <div class="card english">
+                <div class="card-header">
+                    <div class="card-icon">📚</div>
+                </div>
+                <div class="card-body">
+                    <div class="status-badge">Tillgänglig</div>
+                    <h2 class="card-title">English</h2>
+                    <div class="card-level">Årskurs 7-9</div>
+                    <p class="card-description">
+                        Escape the Forbidden Library! Test your English skills with grammar, vocabulary, and comprehension challenges in a dark academia setting.
+                    </p>
+                    <a href="english-escape.html" class="card-link">Start adventure →</a>
+                </div>
+            </div>
+
+            <!-- SO (Samhällskunskap/Historia) -->
+            <div class="card social coming-soon">
+                <div class="card-header">
+                    <div class="card-icon">🌍</div>
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title">SO</h2>
+                    <div class="card-level">Årskurs 7-9</div>
+                    <p class="card-description">
+                        Res genom tiden och världen! Lös historiska mysterier, geografiska gåtor och samhällsvetenskapliga utmaningar.
+                    </p>
+                    <a href="#" class="card-link" onclick="return false;">Kommer snart</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>✨ Skapat för att göra lärande roligt och engagerande ✨</p>
+            <div class="footer-links">
+                <a href="https://github.com" class="footer-link">📁 GitHub</a>
+                <a href="#" class="footer-link" onclick="showInfo(); return false;">ℹ️ Om projektet</a>
+                <a href="#" class="footer-link" onclick="showContact(); return false;">📧 Kontakt</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add interactive hover effects
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.zIndex = '10';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.zIndex = '1';
+            });
+        });
+
+        // Info modal
+        function showInfo() {
+            alert('🎓 Escape Room Academy\n\n' +
+                  'Ett interaktivt lärandeprojekt som kombinerar utbildning med spänning!\n\n' +
+                  '✓ Olika ämnen och svårighetsgrader\n' +
+                  '✓ Spännande tematik och berättelser\n' +
+                  '✓ Perfekt för klassrum eller hemundervisning\n' +
+                  '✓ Helt gratis och open source\n\n' +
+                  'Skapat med ❤️ för elever och lärare');
+        }
+
+        // Contact modal
+        function showContact() {
+            alert('📧 Kontakt\n\n' +
+                  'Har du idéer, feedback eller vill bidra?\n\n' +
+                  '• Öppna en issue på GitHub\n' +
+                  '• Föreslå nya escape rooms\n' +
+                  '• Dela dina erfarenheter från klassrummet\n\n' +
+                  'Tillsammans gör vi lärande roligare! 🚀');
+        }
+
+        // Prevent navigation for coming soon items
+        document.querySelectorAll('.coming-soon .card-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('🎮 Denna escape room är under utveckling!\n\n' +
+                      'Vi arbetar på att skapa fler spännande äventyr.\n' +
+                      'Håll utkik för uppdateringar! ⭐');
+            });
+        });
+
+        // Add particle effect on hover (optional)
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (!this.classList.contains('coming-soon')) {
+                    createRipple(e, this);
+                }
+            });
+        });
+
+        function createRipple(event, element) {
+            const circle = document.createElement('span');
+            const diameter = Math.max(element.clientWidth, element.clientHeight);
+            const radius = diameter / 2;
+
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${event.clientX - element.offsetLeft - radius}px`;
+            circle.style.top = `${event.clientY - element.offsetTop - radius}px`;
+            circle.style.position = 'absolute';
+            circle.style.borderRadius = '50%';
+            circle.style.background = 'rgba(255, 255, 255, 0.5)';
+            circle.style.transform = 'scale(0)';
+            circle.style.animation = 'ripple 0.6s ease-out';
+            circle.style.pointerEvents = 'none';
+
+            element.appendChild(circle);
+
+            setTimeout(() => circle.remove(), 600);
+        }
+
+        // Add CSS for ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
